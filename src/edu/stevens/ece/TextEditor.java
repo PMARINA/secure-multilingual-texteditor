@@ -18,6 +18,10 @@ public class TextEditor extends App {
 		add(editorScrollPane, BorderLayout.CENTER);
 		setVisible(true);
 	}
+	public void open() {
+	}
+	public void save() {
+	}
 	public static void main(String[] args) throws Exception {
 		new TextEditor();
 	}
