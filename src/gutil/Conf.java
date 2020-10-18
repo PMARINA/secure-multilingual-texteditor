@@ -1,5 +1,3 @@
-/*
- */
 package gutil;
 import java.io.*;
 import java.util.*;

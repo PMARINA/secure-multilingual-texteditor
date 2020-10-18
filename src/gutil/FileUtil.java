@@ -3,8 +3,8 @@ package gutil;
 import java.io.*;
 
 /**
- *
  * @author dov
+ * Utility class to display the current directory if there is any doubt
  */
 public class FileUtil {
     public static void displayPWD() throws IOException {

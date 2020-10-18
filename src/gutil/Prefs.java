@@ -5,6 +5,12 @@ import java.awt.*;
 import javax.swing.*;
 import java.util.*;
 
+/*
+ *
+ * @author Dov Kruger
+ * Store look and feel of application
+ * Each component has foreground/background color and font
+ */
 public class Prefs {
     private HashMap<String, Properties> locales;
     private Properties messages;

@@ -1,13 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package gutil;
 
 /**
- *
- * @author yangbai
+ * @author Dov Kruger
+ * Does layout like the original Motif from 30 years ago.
+ * Works much better than the default Java layouts.
+ * This object contains the constraints
+ * each coordinate is %of parent rectangle + delta in pixels
  */
 public class PercentInfo {
     public float px1, py1, dx1, dy1, px2, py2, dx2, dy2;
