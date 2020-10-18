@@ -1,16 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package gutil;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
 /**
- *
  * @author dkruger
+ * JButton with an embedded name that automatically triggers actions with the right name
  */
 public class NamedButton extends JButton {
     private String name;

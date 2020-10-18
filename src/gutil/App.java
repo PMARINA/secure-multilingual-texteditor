@@ -11,6 +11,14 @@ import java.util.Properties;
 import java.util.*;
 import javax.swing.filechooser.FileFilter;
 
+/*
+ * @author: Dov Kruger
+ * Wrapper and convenience class for building Java apps under Swing
+ * without having to tie actions directly to input events.
+ * The programmer defines named actions, and named buttons and menus
+ * automatically trigger. Also provides internationalization in a 
+ * cleaner way.
+ */
 public abstract class App extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private static Style defaultToolStyle;
@@ -70,47 +78,29 @@ public abstract class App extends JFrame {
 		}
 		return null;
 	}
-	/*
-    This Save Dialog works also on Ubuntu since -
-    createFileDialog generate -
-    "Error of failed request: BadWindow (invalid Window parameter)" on Ubuntu
-	*/
-	public String showSaveDialog() {
-		Frame frame = new Frame("Save");
-		FileDialog fd = new FileDialog(frame);
-		/*
-			Filter out files with .stl extension
-			Usefull for Import
-		*/
-		//        fd.setFilenameFilter(new FilenameFilter() {
-		//            @Override
-		//            public boolean accept(File dir, String name) {
-		//                String lowercaseName = name.toLowerCase();
-		//                if (lowercaseName.endsWith(".stl")) {
-		//                    return true;
-		//                } else {
-		//                    return false;
-		//                }
-		//            }
-		//            
-		//        });
 
-		fd.setTitle("Export STL File");
+	/*
+		File dialog to filter out files with known extension
+	*/
+	public String showSaveDialog(String extension) {
+		FileDialog fd = new FileDialog(this);
+		if (extension != null)
+			fd.setFilenameFilter(new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						return name.toLowerCase().endsWith(extension);
+					}
+				});
+
+		fd.setTitle("Save File");
 		fd.pack();
-		fd.setLocationRelativeTo(frame);
+		fd.setLocationRelativeTo(this);
 		fd.setVisible(true);
-        
 		String filepath = fd.getDirectory() + fd.getFile();
-		if(!filepath.toLowerCase().endsWith(".stl")) {
-			filepath += ".stl";
-		}
 		return filepath;
 	}
     
 	protected void buildMenu() throws FileNotFoundException {
-		//for (String[] defaultMenuItem : defaultMenuItems) {
-		//    defaultMap.put(defaultMenuItem[0], defaultMenuItem[1]);
-		//}
 		String[][] defaultMenus = {
 			{"FILE", "PREFERENCES", "QUIT"},
 			{"LANGUAGE", "ENGLISH", "CHINESE"},
@@ -177,7 +167,6 @@ public abstract class App extends JFrame {
 				toolbarStyle.set(toolbar);
 			*/
 			c.add(toolbar, toolbarPos);
-			//            c.add(toolbarPos, toolbar);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Failed to load toolbar");
@@ -232,7 +221,6 @@ public abstract class App extends JFrame {
 		prefs = new Prefs(conf);
 		setSize(conf.defaulted("w", 400), conf.defaulted("h", 768));
 		Container c = getContentPane();
-		//c.setBackground(conf.defaulted("bg", Color.BLUE));
 		c.setForeground(conf.defaulted("fg", Color.WHITE));
         
 		listener = new NamedActionListener();

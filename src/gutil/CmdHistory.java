@@ -12,7 +12,7 @@ public class CmdHistory {
     }
     
     public void doIt(Action a) {
-	hist.add(a);
+			hist.add(a);
         a.doIt(null);
     }
   

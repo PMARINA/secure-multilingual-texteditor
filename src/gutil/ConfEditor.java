@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package gutil;
 import java.awt.Container;
 import java.lang.reflect.*;
@@ -12,9 +7,10 @@ import java.awt.Font;
 import java.awt.event.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 /**
- * Create a JPanel editing all the values in the Conf object
  * @author dkruger
+ * Create a JPanel editing all the values in the Conf object
  */
 public class ConfEditor extends JPanel {
     private App app;
