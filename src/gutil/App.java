@@ -127,7 +127,7 @@ public abstract class App extends JFrame {
 	protected void buildMenu() throws FileNotFoundException {
 		String[][] defaultMenus = {
 			{"FILE", "PREFERENCES", "QUIT"},
-			{"LANGUAGE", "English", "CHINESE"},
+			{"LANGUAGE", "ENGLISH", "CHINESE"},
 			{"HELP", "ABOUT", "WEBDOCS", "LOCALDOCS"}
 		};
         
@@ -229,6 +229,12 @@ public abstract class App extends JFrame {
 				}
 			}      
 		};
+    
+    /*TODO: How can we come up with a menu that triggers a single action "setlanguage"
+      with a parameter that is the language, avoiding all this nonsense?
+      The internal name should be the iso code of the language, ie en, cn, fr, etc.
+      The action should be setlanguage, but that requires a new kind of action with a name and parameter.
+    */
     new IrreversibleAction("ENGLISH") {
       @Override
       public void doIt(ActionEvent e) throws Exception {
@@ -240,7 +246,28 @@ public abstract class App extends JFrame {
         setLanguage("cn");
       }
     };
-    // TODO: it shouldn't be this way. The internal name should be used to trigger the action
+    new IrreversibleAction("HEBREW") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("he");
+      }
+    };
+   new IrreversibleAction("ARABIC") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("ar");
+      }
+    };
+    new IrreversibleAction("FRENCH") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("fr");
+      }
+    };
+   new IrreversibleAction("ITALIAN") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("it");
+      }
+    };
+
+   // TODO: it shouldn't be this way. The internal name should be used to trigger the action
     new IrreversibleAction("English") {
       @Override
       public void doIt(ActionEvent e) throws Exception {
@@ -252,7 +279,7 @@ public abstract class App extends JFrame {
         setLanguage("cn");
       }
     };
-	}
+ 	}
     
 	public App(Conf conf) throws FileNotFoundException {
 		super(conf.defaulted("title", "App Title"));
