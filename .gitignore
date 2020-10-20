@@ -25,3 +25,4 @@ hs_err_pid*
 #don't save anything under build directory
 build/
 *~
+/SMTE/nbproject/private/

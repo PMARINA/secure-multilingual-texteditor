@@ -11,20 +11,37 @@ import java.io.*;
 public class TextEditor extends App {
 	private JTextPane editor;
 	private DefaultStyledDocument doc;
-	private static File currentDir;
-	private static JFileChooser fileChooser;
+  private String saveFile;
+	private File currentDir;
+	private JFileChooser openChooser;
+	private JFileChooser saveChooser;
 	private static DefaultEditorKit editorKit;
 	private static Font defaultFont;
+  JFileChooser buildFileChooser(File dir, Font f, String title) {
+    JFileChooser fc = new JFileChooser(dir);
+    fc.setDialogTitle(lookupText(title));
+    fc.setFont(f);
+    return fc;
+  }
+  
+  File selectFile(JFileChooser fc) {
+    int returnVal = fc.showOpenDialog(this);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+      return fc.getSelectedFile();
+    }
+    return null;
+  }
 	static {
 		editorKit = new DefaultEditorKit();
-		currentDir = new File(".");
-		fileChooser = new JFileChooser(currentDir);
 		defaultFont = new Font("Courier", Font.BOLD, 30);
 	}
-	public void statusAlert(Exception e) {
-		e.printStackTrace(); // for now, just dump to console
-	}
-	public TextEditor() throws Exception {
+  private void buildDialogs() {
+    saveFile = null;
+    currentDir = new File(".");
+    openChooser = buildFileChooser(currentDir, defaultFont, "OPEN");
+    saveChooser = buildFileChooser(currentDir, defaultFont, "SAVEAS");
+  }
+  public TextEditor() throws Exception {
 		super(new Conf("conf/stex.conf")); // TODO: get conf file from home directory
 		setSize(1000,800);
 		editor = new JTextPane();
@@ -32,91 +49,67 @@ public class TextEditor extends App {
 		editor.setDocument(doc = new DefaultStyledDocument());
 		editor.setFont(defaultFont);
 		add(editorScrollPane, BorderLayout.CENTER);
+    buildDialogs();
 		addActions();
 		setVisible(true);
 	}
 	public void addActions() {
 		new IrreversibleAction("SAVE") {
 			@Override public void doIt(ActionEvent e) {
-				save();
+        if (saveFile == null) {
+          //execute saveas
+        } else {
+          // do a save  here
+        }
 			}
 		};
 		new IrreversibleAction("SAVEAS") {
-			@Override public void doIt(ActionEvent e) {
-				saveas();
-			}
-		};
-		new IrreversibleAction("OPEN") {
-			@Override public void doIt(ActionEvent e) {
-				open();
-			}
-		};
-	}
-	public void open() {
-		try {
-			fileChooser.setDialogTitle(lookupText("OPEN"));
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				Reader reader = new BufferedReader(new FileReader(file));
-				editorKit.read(reader, doc, 0);
-				reader.close();
-			}
-		} catch(Exception e) {
-			statusAlert(e);
-		}			
-	}
-	public void save() {
-		try {
-
-		} catch(Exception e) { // if anything goes wrong, alert in the status bar
-			statusAlert(e);
-		}
-	}
-	public void saveas() {
-		try {
-			fileChooser.setDialogTitle(lookupText("SAVEAS..."));
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
+			@Override public void doIt(ActionEvent e) throws Exception {
+				File file = selectFile(saveChooser);
+        if (file == null)
+          return; // user cancelled
 				Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
 				editorKit.write(writer, doc, 0, doc.getLength());
 				writer.close();
 			}
-		} catch(Exception e) { // if anything goes wrong, alert in the status bar
-			statusAlert(e);
-		}
-	}
-	public void openCompressed() {
-		try {
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				GZIPInputStream gz = new GZIPInputStream(new FileInputStream(file));
-				Reader reader = new BufferedReader(new InputStreamReader(gz));
-				editorKit.read(reader, doc, 0);
-				reader.close();
-			}
-		} catch(Exception e) {
-			statusAlert(e);
-		}			
-	}
-
-	public void saveasCompressed() {
-		try {
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fileChooser.getSelectedFile();
-				GZIPOutputStream gz = new GZIPOutputStream(new FileOutputStream(file));
-				Writer writer = new BufferedWriter(new OutputStreamWriter(gz));
-				editorKit.write(writer, doc, 0, doc.getLength());
-				writer.close();
-			}
-		} catch(Exception e) { // if anything goes wrong, alert in the status bar
-			statusAlert(e);
-		}
-	}
-public static void main(String[] args) throws Exception {
+		};
+    new IrreversibleAction("OPEN") {
+      @Override
+      public void doIt(ActionEvent e) throws Exception {
+        File file = selectFile(openChooser);
+        if (file == null)
+          return; // user cancelled
+        Reader reader = new BufferedReader(new FileReader(file));
+        editorKit.read(reader, doc, 0);
+        reader.close();
+      }
+    };
+    new IrreversibleAction("OPEN_COMPRESSED") {
+      @Override public void doIt(ActionEvent e) throws Exception {
+        File file = selectFile(openChooser);
+        if (file == null)
+          return; // user cancelled
+        GZIPInputStream gz = new GZIPInputStream(new FileInputStream(file));
+        Reader reader = new BufferedReader(new InputStreamReader(gz));
+        editorKit.read(reader, doc, 0);
+        reader.close();
+      }
+    };
+  
+    new IrreversibleAction("SAVEAS_COMPRESSED") {
+      @Override public void doIt(ActionEvent e) throws Exception {
+        File file = selectFile(openChooser);
+        if (file == null)
+          return; // user cancelled
+        GZIPOutputStream gz = new GZIPOutputStream(new FileOutputStream(file));
+        Writer writer = new BufferedWriter(new OutputStreamWriter(gz));
+  			editorKit.write(writer, doc, 0, doc.getLength());
+  			writer.close();
+      }
+    };
+  }
+     
+  public static void main(String[] args) throws Exception {
 		new TextEditor();
 	}
 }

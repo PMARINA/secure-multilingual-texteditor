@@ -59,7 +59,31 @@ public abstract class App extends JFrame {
 		String text = languageTranslate.get(name);
 		return text != null ? text : name;
 	}
-    
+  /*
+  TODO: This should provide 3 ways of an application alerting the user
+  1. console, ugly
+  2. status bar
+  3. popup request
+  4. Possible flash of screen to highlight?
+  */
+ 	public void statusAlert(Exception e) {
+		e.printStackTrace(); // for now, just dump to console
+	}
+
+	public JFileChooser buildFileDialog(String title, String suffix) {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle(lookupText(title)); 
+    //fc.setFont();
+    if (suffix != null) {
+  		fc.setAcceptAllFileFilterUsed(false);
+  		String explanation = lookupText(suffix);
+  		FileFilter f = new FileTypeFilter(suffix, explanation);
+  		fc.addChoosableFileFilter(f);
+    }
+    return fc;
+	}
+  
+  
 	// Post a file dialog and return the file selected, null if none
 	public String createFileDialog(String title, String suffix) {
 		JFileChooser fileChooser = new JFileChooser();
@@ -103,7 +127,7 @@ public abstract class App extends JFrame {
 	protected void buildMenu() throws FileNotFoundException {
 		String[][] defaultMenus = {
 			{"FILE", "PREFERENCES", "QUIT"},
-			{"LANGUAGE", "ENGLISH", "CHINESE"},
+			{"LANGUAGE", "English", "CHINESE"},
 			{"HELP", "ABOUT", "WEBDOCS", "LOCALDOCS"}
 		};
         
@@ -183,36 +207,51 @@ public abstract class App extends JFrame {
 	 */
 	public void buildStandardCommands() {
 		new IrreversibleAction("QUIT") {
-			public void doIt(ActionEvent e) {
+			@Override public void doIt(ActionEvent e) {
 				System.exit(0);
 			}
 		};
 		new IrreversibleAction("WEBDOCS") {
-			public void doIt(ActionEvent e) {
-				try {
-					URI uri = new URI(docsURL);
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-						desktop.browse(uri);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+			@Override public void doIt(ActionEvent e) throws Exception {
+				URI uri = new URI(docsURL);
+				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+					desktop.browse(uri);
 				}
 			}      
 		};        
 		new IrreversibleAction("LOCALDOCS") {
-			public void doIt(ActionEvent e) {
-				try {
-					URI uri = new URI(localdocsURL);
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-						desktop.browse(uri);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+			@Override public void doIt(ActionEvent e) throws Exception {
+				URI uri = new URI(localdocsURL);
+				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+					desktop.browse(uri);
 				}
 			}      
-		};        
+		};
+    new IrreversibleAction("ENGLISH") {
+      @Override
+      public void doIt(ActionEvent e) throws Exception {
+        setLanguage("en");
+      }
+    };
+    new IrreversibleAction("CHINESE") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("cn");
+      }
+    };
+    // TODO: it shouldn't be this way. The internal name should be used to trigger the action
+    new IrreversibleAction("English") {
+      @Override
+      public void doIt(ActionEvent e) throws Exception {
+        setLanguage("en");
+      }
+    };
+    new IrreversibleAction("中文") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("cn");
+      }
+    };
 	}
     
 	public App(Conf conf) throws FileNotFoundException {
@@ -223,9 +262,10 @@ public abstract class App extends JFrame {
 		Container c = getContentPane();
 		c.setForeground(conf.defaulted("fg", Color.WHITE));
         
-		listener = new NamedActionListener();
+		listener = new NamedActionListener(this);
 		language = prefs.getLanguage();
 		setLanguage(language);
+    buildStandardCommands();
 		addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
 				quit();
@@ -237,8 +277,6 @@ public abstract class App extends JFrame {
 	public void setDirty() {
 		dirty = true;
 	}
-	public abstract void save();
-	public abstract void open();
 	public void quit() {
 		if (dirty) {
 			// TODO: popup dialog to ask whether to save before quit

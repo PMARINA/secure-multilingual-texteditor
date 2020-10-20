@@ -150,7 +150,7 @@ public class Conf {
                     String pro = m.group(1);
                     String con = m.group(2);
                     languageMap.put(pro, unicodeToString(con));
-                    System.out.println("pro: " + pro + " con: " + unicodeToString(con));
+                    System.out.println(pro + " ==>" + unicodeToString(con));
                 }
             }
             return languageMap;

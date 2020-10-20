@@ -31,17 +31,22 @@ public abstract class Action {
         
     }
 
-    public abstract void doIt(ActionEvent e);
-    public abstract void undo(ActionEvent e);
+    // any of these actions could throw an exception so catch it, and report the standard way
+    public abstract void doIt(ActionEvent e) throws Exception;
+    public abstract void undo(ActionEvent e) throws Exception;
     
     public static Action lookup(String name) {
         return actions.get(name);
     }
-    public static void execute(String name) {
+    public static void execute(App app, String name) {
         Action a = lookup(name);
         if (a == null)
             return;
         System.err.println("executing: " + name);
-        a.doIt(null);
+        try {
+          a.doIt(null);
+        } catch(Exception e) {
+          app.statusAlert(e);
+        }
     }
 }

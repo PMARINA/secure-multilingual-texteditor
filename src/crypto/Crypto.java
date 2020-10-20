@@ -8,7 +8,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 
 public class Crypto {
-	final Cipher cipher;
 	static {
 		// get the provider only once
 		Security.addProvider(new BouncyCastleProvider());
@@ -35,10 +34,10 @@ public class Crypto {
 		Ultimately, the security of your keys rests on your password.
 		If it is small and uses only letters then it's easy to guess.
 	 */
-	public Crypto(String key) throws NoSuchAlgorithmException,
-																	 InvalidKeyException,
-																	 IllegalBlockSizeException,
-																	 NoSuchPaddingException {
+	public static Cipher AES128(String key) throws NoSuchAlgorithmException,
+																								 InvalidKeyException,
+																								 IllegalBlockSizeException,
+																								 NoSuchPaddingException {
 		cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 		 byte[] keyBytes = key.getBytes();
 		 byte[] saltedKey  = new byte[]{
@@ -78,7 +77,25 @@ public class Crypto {
 		 SecretKeySpec keySpec = new SecretKeySpec(keyBytes, algorithm);
 		 cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 	}
-	public final byte[] encrypt(final String text) throws IllegalBlockSizeException, BadPaddingException {
+
+	public static Cipher AES256(String key)  throws NoSuchAlgorithmException,
+																	 InvalidKeyException,
+																	 IllegalBlockSizeException,
+																	 NoSuchPaddingException {
+		final String salt = "(*@!li3ng5ui7niMK";
+		byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		IvParameterSpec ivspec = new IvParameterSpec(iv);
+		SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+		KeySpec spec = new PBEKeySpec(secretKey.toCharArray(), salt.getBytes(), 65536, 256);
+		SecretKey tmp = factory.generateSecret(spec);
+		SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
+		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
+		return cipher;
+	}
+	
+	public static byte[] encrypt(final Cipher c, final String text)
+		throws IllegalBlockSizeException, BadPaddingException {
 		byte[] plainText = text.getBytes();
 		byte[] cypherText = cipher.doFinal(plainText);
 		return cypherText;
