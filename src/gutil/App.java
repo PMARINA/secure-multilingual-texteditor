@@ -41,17 +41,13 @@ public abstract class App extends JFrame {
 	public Conf getConf() { return conf; }
 	public Prefs getPrefs() { return prefs; }
   
-	public void setLanguage(String lang) {
+	public void setLanguage(String lang) throws Exception {
 		language = lang;
-		try {
-			languageTranslate = conf.defaulted(language, new HashMap<String, String>());
-			buildMenu();
-			buildToolBar();
-			doLayout();
-			repaint();
-		} catch (FileNotFoundException e) {
-			System.out.println("Cannot open menu for current language" + e);
-		}
+		languageTranslate = conf.defaulted(language, new HashMap<String, String>());
+		buildMenu();
+		buildToolBar();
+		doLayout();
+		repaint();
 	}
 	public String lookupText(String name) {
 		if (name == null)
@@ -82,8 +78,7 @@ public abstract class App extends JFrame {
     }
     return fc;
 	}
-  
-  
+  /*
 	// Post a file dialog and return the file selected, null if none
 	public String createFileDialog(String title, String suffix) {
 		JFileChooser fileChooser = new JFileChooser();
@@ -106,6 +101,7 @@ public abstract class App extends JFrame {
 	/*
 		File dialog to filter out files with known extension
 	*/
+  /*
 	public String showSaveDialog(String extension) {
 		FileDialog fd = new FileDialog(this);
 		if (extension != null)
@@ -123,11 +119,11 @@ public abstract class App extends JFrame {
 		String filepath = fd.getDirectory() + fd.getFile();
 		return filepath;
 	}
-    
+    */
 	protected void buildMenu() throws FileNotFoundException {
 		String[][] defaultMenus = {
 			{"FILE", "PREFERENCES", "QUIT"},
-			{"LANGUAGE", "ENGLISH", "CHINESE"},
+			{"LANGUAGE", "ENGLISH", "CHINESE", "FRENCH", "SPANISH", "ITALIAN", "HEBREW", "ARABIC"},
 			{"HELP", "ABOUT", "WEBDOCS", "LOCALDOCS"}
 		};
         
@@ -147,10 +143,10 @@ public abstract class App extends JFrame {
 		setJMenuBar(mb);
 	}
     
-	private void buildToolBar() {
+	private void buildToolBar() throws Exception {
 		Container c = getContentPane();
 		String toolbarPos  = conf.defaulted("toolbarPos", BorderLayout.WEST);
-		String[][] defaultToolNames = {{},{}}; //NEW,  OPEN, SAVE, QUIT};
+		String[][] defaultToolNames = {{"NEW", "OPEN", "SAVE", "SAVEAS", "CUT", "COPY", "PASTE"},{}}; //NEW,  OPEN, SAVE, QUIT};
 		//String[] toolNames = conf.defaulted("toolnames", defaultToolNames);
 		Properties lang = prefs.getMessages();
 		Style toolbarStyle = conf.defaulted("toolbarStyle", prefs.getMenuStyle());
@@ -169,9 +165,8 @@ public abstract class App extends JFrame {
         
 		int iconSize = conf.defaulted("iconsize", 32);
 		final String prefix = "img/" + iconSize + "/";
-		try {
-			Toolbar toolbar = new Toolbar(this, toolNames, iconSize, listener);
-			toolbarStyle.set(toolbar);
+		Toolbar toolbar = new Toolbar(this, toolNames, iconSize, listener);
+		toolbarStyle.set(toolbar);
 			/*
 				toolbar.setLayout(new GridLayout(toolNames.length, 2));
 				JButton b;
@@ -190,11 +185,7 @@ public abstract class App extends JFrame {
 				}
 				toolbarStyle.set(toolbar);
 			*/
-			c.add(toolbar, toolbarPos);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Failed to load toolbar");
-		}     
+		c.add(toolbar, toolbarPos);
 	}
     
 	/**
@@ -202,8 +193,8 @@ public abstract class App extends JFrame {
 	 * 
 	 * QUIT (just get out)
 	 * CHECK_SAVE_AND_QUIT (first pop up a dialog box if the dirty bit is set, and ask whether to save before quitting
-	 * JUMPTO_WEBDOCS   (jump to the link for the online help for this project)
-	 * JUMPT_LOCALWEBDOCS (jump to a local file with a local copy of the online help so it works even without internet
+	 * WEBDOCS   (jump to the link for the online help for this project)
+	 * LOCALDOCS (jump to a local file with a local copy of the online help so it works even without internet
 	 */
 	public void buildStandardCommands() {
 		new IrreversibleAction("QUIT") {
@@ -235,39 +226,6 @@ public abstract class App extends JFrame {
       The internal name should be the iso code of the language, ie en, cn, fr, etc.
       The action should be setlanguage, but that requires a new kind of action with a name and parameter.
     */
-    new IrreversibleAction("ENGLISH") {
-      @Override
-      public void doIt(ActionEvent e) throws Exception {
-        setLanguage("en");
-      }
-    };
-    new IrreversibleAction("CHINESE") {
-			@Override public void doIt(ActionEvent e) throws Exception {
-        setLanguage("cn");
-      }
-    };
-    new IrreversibleAction("HEBREW") {
-			@Override public void doIt(ActionEvent e) throws Exception {
-        setLanguage("he");
-      }
-    };
-   new IrreversibleAction("ARABIC") {
-			@Override public void doIt(ActionEvent e) throws Exception {
-        setLanguage("ar");
-      }
-    };
-    new IrreversibleAction("FRENCH") {
-			@Override public void doIt(ActionEvent e) throws Exception {
-        setLanguage("fr");
-      }
-    };
-   new IrreversibleAction("ITALIAN") {
-			@Override public void doIt(ActionEvent e) throws Exception {
-        setLanguage("it");
-      }
-    };
-
-   // TODO: it shouldn't be this way. The internal name should be used to trigger the action
     new IrreversibleAction("English") {
       @Override
       public void doIt(ActionEvent e) throws Exception {
@@ -279,9 +237,35 @@ public abstract class App extends JFrame {
         setLanguage("cn");
       }
     };
+    new IrreversibleAction("ִבריתִע") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("he");
+      }
+    };
+   new IrreversibleAction("عربى") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("ar");
+      }
+    };
+   //Español
+    new IrreversibleAction("Francais") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("fr");
+      }
+    };
+   new IrreversibleAction("Italiano") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("it");
+      }
+    };
+   new IrreversibleAction("русский") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("ru");
+      }
+    };
  	}
     
-	public App(Conf conf) throws FileNotFoundException {
+	public App(Conf conf) throws Exception {
 		super(conf.defaulted("title", "App Title"));
 		this.conf = conf;
 		prefs = new Prefs(conf);
