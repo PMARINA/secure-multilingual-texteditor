@@ -11,7 +11,7 @@ public class CmdHistory {
         current = 0;
     }
     
-    public void doIt(Action a) {
+    public void doIt(Action a) throws Exception {
 			hist.add(a);
         a.doIt(null);
     }

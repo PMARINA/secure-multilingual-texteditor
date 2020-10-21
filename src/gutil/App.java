@@ -41,17 +41,13 @@ public abstract class App extends JFrame {
 	public Conf getConf() { return conf; }
 	public Prefs getPrefs() { return prefs; }
   
-	public void setLanguage(String lang) {
+	public void setLanguage(String lang) throws Exception {
 		language = lang;
-		try {
-			languageTranslate = conf.defaulted(language, new HashMap<String, String>());
-			buildMenu();
-			buildToolBar();
-			doLayout();
-			repaint();
-		} catch (FileNotFoundException e) {
-			System.out.println("Cannot open menu for current language" + e);
-		}
+		languageTranslate = conf.defaulted(language, new HashMap<String, String>());
+		buildMenu();
+		buildToolBar();
+		doLayout();
+		repaint();
 	}
 	public String lookupText(String name) {
 		if (name == null)
@@ -59,7 +55,30 @@ public abstract class App extends JFrame {
 		String text = languageTranslate.get(name);
 		return text != null ? text : name;
 	}
-    
+  /*
+  TODO: This should provide 3 ways of an application alerting the user
+  1. console, ugly
+  2. status bar
+  3. popup request
+  4. Possible flash of screen to highlight?
+  */
+ 	public void statusAlert(Exception e) {
+		e.printStackTrace(); // for now, just dump to console
+	}
+
+	public JFileChooser buildFileDialog(String title, String suffix) {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle(lookupText(title)); 
+    //fc.setFont();
+    if (suffix != null) {
+  		fc.setAcceptAllFileFilterUsed(false);
+  		String explanation = lookupText(suffix);
+  		FileFilter f = new FileTypeFilter(suffix, explanation);
+  		fc.addChoosableFileFilter(f);
+    }
+    return fc;
+	}
+  /*
 	// Post a file dialog and return the file selected, null if none
 	public String createFileDialog(String title, String suffix) {
 		JFileChooser fileChooser = new JFileChooser();
@@ -82,6 +101,7 @@ public abstract class App extends JFrame {
 	/*
 		File dialog to filter out files with known extension
 	*/
+  /*
 	public String showSaveDialog(String extension) {
 		FileDialog fd = new FileDialog(this);
 		if (extension != null)
@@ -99,11 +119,11 @@ public abstract class App extends JFrame {
 		String filepath = fd.getDirectory() + fd.getFile();
 		return filepath;
 	}
-    
+    */
 	protected void buildMenu() throws FileNotFoundException {
 		String[][] defaultMenus = {
 			{"FILE", "PREFERENCES", "QUIT"},
-			{"LANGUAGE", "ENGLISH", "CHINESE"},
+			{"LANGUAGE", "ENGLISH", "CHINESE", "FRENCH", "SPANISH", "ITALIAN", "HEBREW", "ARABIC"},
 			{"HELP", "ABOUT", "WEBDOCS", "LOCALDOCS"}
 		};
         
@@ -123,10 +143,10 @@ public abstract class App extends JFrame {
 		setJMenuBar(mb);
 	}
     
-	private void buildToolBar() {
+	private void buildToolBar() throws Exception {
 		Container c = getContentPane();
 		String toolbarPos  = conf.defaulted("toolbarPos", BorderLayout.WEST);
-		String[][] defaultToolNames = {{},{}}; //NEW,  OPEN, SAVE, QUIT};
+		String[][] defaultToolNames = {{"NEW", "OPEN", "SAVE", "SAVEAS", "CUT", "COPY", "PASTE"},{}}; //NEW,  OPEN, SAVE, QUIT};
 		//String[] toolNames = conf.defaulted("toolnames", defaultToolNames);
 		Properties lang = prefs.getMessages();
 		Style toolbarStyle = conf.defaulted("toolbarStyle", prefs.getMenuStyle());
@@ -145,9 +165,8 @@ public abstract class App extends JFrame {
         
 		int iconSize = conf.defaulted("iconsize", 32);
 		final String prefix = "img/" + iconSize + "/";
-		try {
-			Toolbar toolbar = new Toolbar(this, toolNames, iconSize, listener);
-			toolbarStyle.set(toolbar);
+		Toolbar toolbar = new Toolbar(this, toolNames, iconSize, listener);
+		toolbarStyle.set(toolbar);
 			/*
 				toolbar.setLayout(new GridLayout(toolNames.length, 2));
 				JButton b;
@@ -166,11 +185,7 @@ public abstract class App extends JFrame {
 				}
 				toolbarStyle.set(toolbar);
 			*/
-			c.add(toolbar, toolbarPos);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Failed to load toolbar");
-		}     
+		c.add(toolbar, toolbarPos);
 	}
     
 	/**
@@ -178,44 +193,79 @@ public abstract class App extends JFrame {
 	 * 
 	 * QUIT (just get out)
 	 * CHECK_SAVE_AND_QUIT (first pop up a dialog box if the dirty bit is set, and ask whether to save before quitting
-	 * JUMPTO_WEBDOCS   (jump to the link for the online help for this project)
-	 * JUMPT_LOCALWEBDOCS (jump to a local file with a local copy of the online help so it works even without internet
+	 * WEBDOCS   (jump to the link for the online help for this project)
+	 * LOCALDOCS (jump to a local file with a local copy of the online help so it works even without internet
 	 */
 	public void buildStandardCommands() {
 		new IrreversibleAction("QUIT") {
-			public void doIt(ActionEvent e) {
+			@Override public void doIt(ActionEvent e) {
 				System.exit(0);
 			}
 		};
 		new IrreversibleAction("WEBDOCS") {
-			public void doIt(ActionEvent e) {
-				try {
-					URI uri = new URI(docsURL);
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-						desktop.browse(uri);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+			@Override public void doIt(ActionEvent e) throws Exception {
+				URI uri = new URI(docsURL);
+				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+					desktop.browse(uri);
 				}
 			}      
 		};        
 		new IrreversibleAction("LOCALDOCS") {
-			public void doIt(ActionEvent e) {
-				try {
-					URI uri = new URI(localdocsURL);
-					Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
-					if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-						desktop.browse(uri);
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+			@Override public void doIt(ActionEvent e) throws Exception {
+				URI uri = new URI(localdocsURL);
+				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+					desktop.browse(uri);
 				}
 			}      
-		};        
-	}
+		};
     
-	public App(Conf conf) throws FileNotFoundException {
+    /*TODO: How can we come up with a menu that triggers a single action "setlanguage"
+      with a parameter that is the language, avoiding all this nonsense?
+      The internal name should be the iso code of the language, ie en, cn, fr, etc.
+      The action should be setlanguage, but that requires a new kind of action with a name and parameter.
+    */
+    new IrreversibleAction("English") {
+      @Override
+      public void doIt(ActionEvent e) throws Exception {
+        setLanguage("en");
+      }
+    };
+    new IrreversibleAction("中文") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("cn");
+      }
+    };
+    new IrreversibleAction("ִבריתִע") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("he");
+      }
+    };
+   new IrreversibleAction("عربى") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("ar");
+      }
+    };
+   //Español
+    new IrreversibleAction("Francais") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("fr");
+      }
+    };
+   new IrreversibleAction("Italiano") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("it");
+      }
+    };
+   new IrreversibleAction("русский") {
+			@Override public void doIt(ActionEvent e) throws Exception {
+        setLanguage("ru");
+      }
+    };
+ 	}
+    
+	public App(Conf conf) throws Exception {
 		super(conf.defaulted("title", "App Title"));
 		this.conf = conf;
 		prefs = new Prefs(conf);
@@ -223,9 +273,10 @@ public abstract class App extends JFrame {
 		Container c = getContentPane();
 		c.setForeground(conf.defaulted("fg", Color.WHITE));
         
-		listener = new NamedActionListener();
+		listener = new NamedActionListener(this);
 		language = prefs.getLanguage();
 		setLanguage(language);
+    buildStandardCommands();
 		addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
 				quit();
@@ -237,8 +288,6 @@ public abstract class App extends JFrame {
 	public void setDirty() {
 		dirty = true;
 	}
-	public abstract void save();
-	public abstract void open();
 	public void quit() {
 		if (dirty) {
 			// TODO: popup dialog to ask whether to save before quit
