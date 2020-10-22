@@ -48,6 +48,8 @@ public class TextEditor extends App {
 		JScrollPane editorScrollPane = new JScrollPane(editor);
 		editor.setDocument(doc = new DefaultStyledDocument());
 		editor.setFont(defaultFont);
+    KeyInterceptor keyInterceptor = new KeyInterceptor();
+    editor.addKeyListener(keyInterceptor);
 		add(editorScrollPane, BorderLayout.CENTER);
     buildDialogs();
 		addActions();
@@ -112,4 +114,61 @@ public class TextEditor extends App {
   public static void main(String[] args) throws Exception {
 		new TextEditor();
 	}
+  
+  class KeyInterceptor implements KeyListener {
+    final static int GREEK = 0x0370;
+    final static int HEBREW = 0x05d0;
+    final static int ARABIC = 0x0600;
+    final static int PHOENICIAN = 0x10900;
+    final static String greekMap = "ΑΒcΔΕΦΓΗΙjΚΛΜΝΟΠqΡΣΤuvΩXΥZ[\\]^_`αβcδεφγηικλμνοπqρστuvwχυζ???ΘθΞξςΨψ";
+    final static String hebrewMap = "א‎בכ‎‎ד‎הeגפ‎ו‎ז‎לק‎חמנר‎‎ט‎י	‎ך‎ס‎ע‎צ‎ש‎ץתףןם";
+    int mode;
+    String currentMap;
+    
+    public KeyInterceptor() {
+      mode = 0;
+      currentMap = null;
+    }
+    @Override public void keyPressed(KeyEvent e) {
+//      if (e.getModifiersEx() != KeyEvent.ALT_DOWN_MASK)
+//        return;
+      char c = e.getKeyChar();
+      System.out.println((int)c);
+ 
+      switch(c) { // control-G
+        case 12:
+          currentMap = hebrewMap; mode = HEBREW;
+          e.consume();
+          break;
+        case 7:
+          currentMap = greekMap; mode = GREEK;  
+          System.out.println("Greek Mode" + currentMap);
+          e.consume(); break;
+        case 6:
+          System.out.println("PHOENICIAN MODE");
+          mode = PHOENICIAN;  e.consume();
+          e.consume();
+           break;
+        default:
+          
+          break;
+          
+      }
+    }
+
+    @Override public void keyTyped(KeyEvent e) {
+      if (mode == 0) {
+        return; // allow normal processing of the event
+      }
+      char c = e.getKeyChar();
+      if (c >= 'A' && c <= 'z') {
+        char replace = currentMap.charAt(c - 'A');
+//        System.out.println(replace);
+        e.setKeyChar(replace);
+      }
+    }
+
+    @Override public void keyReleased(KeyEvent e) {
+    }
+  }
 }
