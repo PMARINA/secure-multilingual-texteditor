@@ -1,0 +1,8 @@
+Create keyboard listener that switches languages with control-G = Greek for example
+Create mapping for quick and dirty switching languages like inserting Greek letters.
+Support one ancient language like Phoenician
+Add in support for document compression using bzip from apache compress library
+Complete encryption using AES-256
+Digitally sign documents using a public/private key
+Have a trusted signature server for keys so documents can be shared with specific people
+Build code native using graalvm to see how fast and small it is
