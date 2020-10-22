@@ -121,6 +121,7 @@ public class TextEditor extends App {
     final static int ARABIC = 0x0600;
     final static int PHOENICIAN = 0x10900;
     final static String greekMap = "ΑΒcΔΕΦΓΗΙjΚΛΜΝΟΠqΡΣΤuvΩXΥZ[\\]^_`αβcδεφγηικλμνοπqρστuvwχυζ???ΘθΞξςΨψ";
+    final static String hebrewMap = "א‎בכ‎‎ד‎הeגפ‎ו‎ז‎לק‎חמנר‎‎ט‎י	‎ך‎ס‎ע‎צ‎ש‎ץתףןם";
     int mode;
     String currentMap;
     
@@ -129,10 +130,16 @@ public class TextEditor extends App {
       currentMap = null;
     }
     @Override public void keyPressed(KeyEvent e) {
-              
+//      if (e.getModifiersEx() != KeyEvent.ALT_DOWN_MASK)
+//        return;
       char c = e.getKeyChar();
       System.out.println((int)c);
+ 
       switch(c) { // control-G
+        case 12:
+          currentMap = hebrewMap; mode = HEBREW;
+          e.consume();
+          break;
         case 7:
           currentMap = greekMap; mode = GREEK;  
           System.out.println("Greek Mode" + currentMap);
